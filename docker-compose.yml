@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  frontend:  # simplified service name
+    build: .
+    container_name: anycademy-frontend  # explicit container name
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    # ...other configurations...
+
+  anycademy-database:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    env_file: 
+      - .env
+    environment:
+      POSTGRES_DB: anycademy
+    ports:
+      - "12900:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # ...other configurations...
+
+volumes:
+  postgres_data:
