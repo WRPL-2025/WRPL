@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   frontend:  # simplified service name
-    build: .
+    build: ./frontend
     container_name: anycademy-frontend  # explicit container name
     ports:
       - "3000:3000"
