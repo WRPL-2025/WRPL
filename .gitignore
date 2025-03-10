@@ -1,7 +1,11 @@
-# Node dependencies
+# Node dependencies (comprehensive)
 node_modules
 **/node_modules
-*/node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.pnp
+.pnp.js
 backend/microservices/nodejs/node_modules
 frontend/node_modules
 
