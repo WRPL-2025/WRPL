@@ -1,9 +1,9 @@
-# Node
-node_modules/
-*/node_modules/
-**/node_modules/
-package-lock.json
-yarn.lock
+# Node dependencies
+node_modules
+**/node_modules
+*/node_modules
+backend/microservices/nodejs/node_modules
+frontend/node_modules
 
 # Build
 dist/
