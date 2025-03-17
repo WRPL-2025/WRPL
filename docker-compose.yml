@@ -11,7 +11,7 @@ services:
 
   backend:
     build:
-      context: ./backend/microservices/nodejs  # Updated path
+      context: ./backend/microservices/main-nodejs # Updated path
       dockerfile: Dockerfile
     container_name: anycademy-backend
     ports:

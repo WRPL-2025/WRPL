@@ -1,3 +1,3 @@
 FROM postgres:14
-COPY . /docker-entrypoint-initdb.d/
+COPY init/anycademy.sql /docker-entrypoint-initdb.d/anycademy.sql
 # Add any custom configurations or scripts as needed.
