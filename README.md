@@ -41,3 +41,48 @@ After you download the plugin.
 
 iPaymu offers payment in Rupiah currencies that supported with virtual accounts, QRIS, paylater, e-wallet, retail outlets and credit card around Indonesia.
 You might visit our website at [www.iPaymu.com](https://www.iPaymu.com/) for further information.
+
+
+
+
+ ## How to do Unit Testing in PHP with PHPUnit:
+ 
+  1. Install PHPUnit:
+     Use Composer: `composer require --dev phpunit/phpunit`
+ 
+  2. Create Test Classes:
+     - For a class `MyClass`, create `MyClassTest.php` (e.g., in a `tests/` directory).
+     - Test classes extend `\PHPUnit\Framework\TestCase`.
+     Example:
+       // tests/MyClassTest.php
+       <?php
+       use PHPUnit\Framework\TestCase;
+       // require_once 'path/to/MyClass.php'; // If not using autoloader
+ 
+       class MyClassTest extends TestCase {
+           public function testMethodName() {
+               // $obj = new MyClass();
+               // $this->assertEquals(expected, $obj->someMethod());
+               $this->assertTrue(true); // Placeholder for actual test logic
+           }
+       }
+ 
+  3. Write Test Methods:
+     - Public methods, names usually start with `test`.
+     - Use assertions to check outcomes (e.g., `assertEquals`, `assertTrue`, `assertFalse`).
+ 
+  4. Run Tests:
+     From your project root: `./vendor/bin/phpunit`
+ 
+  5. Configuration (Optional):
+     Use `phpunit.xml` or `phpunit.xml.dist` for test suite configuration, bootstrapping, etc.
+ 
+  Testing Moodle Plugins (like enrol_ipaymu):
+  - Moodle has its own testing infrastructure. It's recommended to use it.
+  - Mocking Moodle's global objects ($DB, $CFG, $USER) and API is often necessary.
+  - For `enrol_ipaymu_plugin`, you'd create `enrol_ipaymu_plugin_test.php`.
+    Methods like `get_currencies()` could be tested by instantiating the plugin
+    (possibly with mocked dependencies) and asserting the returned array structure.
+  - Refer to Moodle developer documentation for specific guidance on plugin testing.
+ 
+
