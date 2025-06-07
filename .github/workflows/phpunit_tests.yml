@@ -6,7 +6,7 @@ on:
       - moodle_plugin
   pull_request:
     branches:
-      - moodle_plugin # Ganti dengan nama branch utama Anda
+      - moodle_plugin 
 
 jobs:
   run-tests:
