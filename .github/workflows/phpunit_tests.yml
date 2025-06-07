@@ -1,0 +1,103 @@
+name: PHPUnit Tests for iPaymu Enrolment Plugin
+
+on:
+  push:
+    branches:
+      - moodle_plugin
+  pull_request:
+    branches:
+      - moodle_plugin # Ganti dengan nama branch utama Anda
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: moodle_test_db
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1' 
+        extensions: mysqli, pdo_mysql, curl, mbstring, dom, gd, xml, zip, intl, soap
+        ini-values: memory_limit=-1, max_execution_time=600
+
+    - name: Configure Moodle for PHPUnit (Dummy Installation)
+      run: |
+        echo "Creating a dummy Moodle installation for testing purposes..."
+
+        MOODLE_CI_ROOT="/tmp/moodle_ci_root"
+        mkdir -p "$MOODLE_CI_ROOT"
+                
+        mkdir -p "$MOODLE_CI_ROOT/enrol/"
+        cp -R enrol/ipaymu "$MOODLE_CI_ROOT/enrol/"
+
+        echo "<?php
+        define('MOODLE_INTERNAL', true);
+        \$CFG = new stdClass();
+        \$CFG->dbtype    = 'mysqli';
+        \$CFG->dblibrary = 'native';
+        \$CFG->dbhost    = '127.0.0.1';
+        \$CFG->dbname    = 'moodle_test_db';
+        \$CFG->dbuser    = 'root';
+        \$CFG->dbpass    = 'password'; # Sesuai dengan MYSQL_ROOT_PASSWORD di 'services'
+        \$CFG->wwwroot   = 'http://localhost';
+        \$CFG->dataroot  = '/tmp/moodledata'; # Direktori data sementara
+        \$CFG->dirroot   = '$MOODLE_CI_ROOT'; # Direktori Moodle root untuk CI
+        \$CFG->admin     = 'admin';
+        \$CFG->directorypermissions = 0777;
+        \$CFG->phpunit_dataroot = '/tmp/moodledata_phpunit'; # Wajib untuk PHPUnit Moodle
+        \$CFG->phpunit_prefix = 't_'; # Wajib untuk PHPUnit Moodle
+        \$CFG->phpunit_logfilepath = '/tmp/phpunit_log.txt';
+        \$CFG->phpunit_generates_config = false; # Mencegah PHPUnit mencoba membuat config.php
+        \$CFG->debug = E_ALL | E_STRICT;
+        \$CFG->debugdisplay = true;
+        
+        
+        require_once('$MOODLE_CI_ROOT/lib/setup.php');
+        ?>" > "$MOODLE_CI_ROOT/config.php"
+        
+        mkdir -p /tmp/moodledata /tmp/moodledata_phpunit
+
+    - name: Download Moodle
+      run: |
+        MOODLE_VERSION="4.1" # Contoh, ganti dengan versi Moodle Anda
+        wget "https://download.moodle.org/download.php/direct/moodle-${MOODLE_VERSION}.tgz" -O /tmp/moodle.tgz
+        tar -xzf /tmp/moodle.tgz -C /tmp/
+        mv /tmp/moodle /tmp/moodle_ci_root # Pindahkan Moodle ke direktori dummy
+
+        rm -rf /tmp/moodle_ci_root/enrol/ipaymu # Hapus dummy copy jika ada
+        cp -R enrol/ipaymu /tmp/moodle_ci_root/enrol/
+
+    - name: Prepare Moodle Test Database
+
+      run: |
+        php /tmp/moodle_ci_root/admin/tool/phpunit/cli/init.php
+        php /tmp/moodle_ci_root/admin/tool/phpunit/cli/util.php --create-config
+        php /tmp/moodle_ci_root/admin/tool/phpunit/cli/util.php --create-test-db
+      env:
+        
+        MOODLE_DOCKER_DBHOST: 127.0.0.1
+        MOODLE_DOCKER_DBNAME: moodle_test_db
+        MOODLE_DOCKER_DBUSER: root
+        MOODLE_DOCKER_DBPASS: password
+        MOODLE_DOCKER_WWWROOT: http://localhost
+        MOODLE_DOCKER_DATAROOT: /tmp/moodledata
+        MOODLE_DOCKER_ADMIN_USER: admin
+        MOODLE_DOCKER_ADMIN_PASSWORD: password
+
+    - name: Run PHPUnit tests
+      run: |
+        /tmp/moodle_ci_root/vendor/bin/phpunit --configuration /tmp/moodle_ci_root/enrol/ipaymu/phpunit.xml
+      working-directory: /tmp/moodle_ci_root 
